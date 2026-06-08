@@ -1,0 +1,100 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group   = 'io.github.buldruu'
+version = '2.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JSON задлалт
+    api 'com.google.code.gson:gson:2.11.0'
+
+    // Firebase Realtime Database REST client (HTTP шууд ашиглах тул нэмэлт SDK хэрэггүй)
+    // java.net.http.HttpClient ашиглаж байгаа тул гадаад dependency байхгүй
+
+    // Tests
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly    'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// ─── GitHub Packages publish ──────────────────────────────────────────────────
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId    = 'io.github.buldruu'
+            artifactId = 'auto-api-client'
+            version    = project.version
+
+            from components.java
+
+            pom {
+                name        = 'Auto API Client'
+                description = 'Java client for auto-api.com with Firebase Realtime Database caching — search car listings from encar, mobile.de, autoscout24 and more'
+                url         = 'https://github.com/Buldruu/encar'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url  = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id    = 'Buldruu'
+                        name  = 'Buldruu'
+                        url   = 'https://github.com/Buldruu'
+                    }
+                }
+
+                scm {
+                    url                 = 'https://github.com/Buldruu/encar'
+                    connection          = 'scm:git:git://github.com/Buldruu/encar.git'
+                    developerConnection = 'scm:git:ssh://github.com/Buldruu/encar.git'
+                }
+            }
+        }
+    }
+
+    repositories {
+        // ── GitHub Packages (үндсэн) ──
+        maven {
+            name = 'GitHubPackages'
+            url  = 'https://maven.pkg.github.com/Buldruu/encar'
+            credentials {
+                username = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user') ?: ''
+                password = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')  ?: ''
+            }
+        }
+    }
+}
+
+// GPG гарын үсэг (GitHub Packages-т заавал биш, Maven Central-д шаардлагатай)
+signing {
+    required { !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask('publish') }
+    if (System.getenv('GPG_PRIVATE_KEY')) {
+        useInMemoryPgpKeys(
+            System.getenv('GPG_PRIVATE_KEY'),
+            System.getenv('GPG_PASSPHRASE') ?: ''
+        )
+    }
+    sign publishing.publications.maven
+}
