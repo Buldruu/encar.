@@ -1,6 +1,8 @@
 # Gradle
 .gradle/
 build/
+
+# Wrapper JAR-г commit хийх ёстой тул хасахгүй
 !gradle/wrapper/gradle-wrapper.jar
 
 # IDE

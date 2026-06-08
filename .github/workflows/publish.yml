@@ -27,8 +27,6 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
 
       - name: Run tests
         run: ./gradlew test --no-daemon
@@ -60,8 +58,6 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
 
       - name: Publish to GitHub Packages
         run: ./gradlew publish --no-daemon
